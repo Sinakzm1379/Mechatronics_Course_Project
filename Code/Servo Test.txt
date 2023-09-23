@@ -1,0 +1,21 @@
+int zeroangle = 0 ;
+#include <Servo.h> 
+
+Servo servoZ;
+Servo servoX; // servo object representing the MG 996R servo
+
+void setup() {
+  servoZ.attach(2);
+  servoX.attach(3); // servo is wired to Arduino on digital pin 3
+  servoZ.write(65);
+  servoX.write(30);
+}
+
+void loop() {
+  // servo.write(zeroangle);
+  // delay(1000);
+  // servo.write(zeroangle +45);
+  // delay(1000);
+  // servo.write(zeroangle +90);
+
+}

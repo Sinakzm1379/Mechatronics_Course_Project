@@ -1,0 +1,99 @@
+#include <Wire.h>
+#include <BH1750.h>
+#include <TimerOne.h>
+
+// PCA9548A I2C address
+#define PCA9548A_ADDRESS 0x70
+
+// BH1750 I2C address
+#define BH1750_ADDRESS 0x23
+
+// BH1750 object
+BH1750 lightMeter1(BH1750_ADDRESS);
+BH1750 lightMeter2(BH1750_ADDRESS);
+BH1750 lightMeter3(BH1750_ADDRESS);
+BH1750 lightMeter4(BH1750_ADDRESS);
+
+// BH1750 Channel
+int lightMetersCh[4] = {0,1,3,7};
+
+// Interval between readings
+unsigned long interval = 1000;
+unsigned long previousMillis = 0;
+
+// Flag for new reading
+volatile bool newReading = false;
+
+void setup() {
+  // Initialize serial communication
+  Serial.begin(9600);
+
+  // Initialize I2C communication
+  Wire.begin();
+
+  // Initialize BH1750 light sensors and PCA9548A
+  initBH1750(lightMeter1, lightMetersCh[0]);
+  initBH1750(lightMeter2, lightMetersCh[1]);
+  initBH1750(lightMeter3, lightMetersCh[2]);
+  initBH1750(lightMeter4, lightMetersCh[3]);
+
+  // delay(1000);
+
+  // Attach Timer1 interrupt
+  // Timer1.initialize(interval);
+  // Timer1.attachInterrupt(readLight);
+}
+
+void loop() {
+
+  readLight();
+  delay(100);
+}
+
+void readLight() {
+    // Read light level from sensor 1
+    float lux1 = readLightLevels(lightMeter1, 0);
+    Serial.print("Sensor 1: ");
+    Serial.println(lux1);
+
+    // Read light level from sensor 2
+    float lux2 = readLightLevels(lightMeter2, 1);
+    Serial.print("Sensor 2: ");
+    Serial.println(lux2);
+
+    // Read light level from sensor 3
+    float lux3 = readLightLevels(lightMeter3, 3);
+    Serial.print("Sensor 3: ");
+    Serial.println(lux3);
+
+    // Read light level from sensor 4
+    float lux4 = readLightLevels(lightMeter4, 7);
+    Serial.print("Sensor 4: ");
+    Serial.println(lux4);
+}
+
+void initBH1750(BH1750 &lightMeter, uint8_t channel) {
+
+  // Initialize BH1750 (Sensor 1)
+  Wirebegins(channel);
+  lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE_2);
+
+  Serial.println("BH1750 Sensors : CHECK");
+
+}
+
+void Wirebegins(uint8_t channel) {
+  // Select channel on PCA9548A
+  Wire.beginTransmission(PCA9548A_ADDRESS);
+  Wire.write(1 << channel);
+  Wire.endTransmission();
+  Serial.println("Wires : CHECK");
+}
+float readLightLevels(BH1750 &lightMeter, uint8_t channel) {
+  // Select channel on PCA9548A
+  Wire.beginTransmission(PCA9548A_ADDRESS);
+  Wire.write(1 << channel);
+  Wire.endTransmission();
+  // Read light level
+  return lightMeter.readLightLevel();
+}
